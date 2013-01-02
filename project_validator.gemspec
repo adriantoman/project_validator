@@ -24,7 +24,6 @@ Gem::Specification.new do |s|
   s.add_dependency "faster_csv"
   s.add_dependency "archiver"
   s.add_dependency "gli"
-  s.add_dependency "pp"
   s.add_dependency "date"
   s.add_dependency "chronic"
   s.add_dependency "fastercsv"
