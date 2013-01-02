@@ -21,7 +21,6 @@ Gem::Specification.new do |s|
   # specify any dependencies here; for example:
   s.add_dependency "gooddata"
   s.add_dependency "json"
-  s.add_dependency "faster_csv"
   s.add_dependency "archiver"
   s.add_dependency "gli"
   s.add_dependency "chronic"
