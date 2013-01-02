@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   s.add_dependency "chronic"
   s.add_dependency "fastercsv"
   s.add_dependency "logger"
-  s.add_dependency "google_drive"
+  #s.add_dependency "google_drive"
 
 end
 
