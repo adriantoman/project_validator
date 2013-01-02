@@ -22,8 +22,8 @@ require 'date'
 require 'gooddata'
 require 'gooddata/command'
 require 'logger'
-require "../lib/google_downloader.rb"
-require "../lib/validation.rb"
+require 'google_downloader.rb'
+require 'validation.rb'
 
 include GLI
 
