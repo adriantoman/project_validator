@@ -1,0 +1,98 @@
+#!/usr/bin/env ruby
+# 1.9 adds realpath to resolve symlinks; 1.8 doesn't
+# have this method, so we add it so we get resolved symlinks
+# and compatibility
+unless File.respond_to? :realpath
+  class File #:nodoc:
+    def self.realpath path
+      return realpath(File.readlink(path)) if symlink?(path)
+      path
+    end
+  end
+end
+$: << File.expand_path(File.dirname(File.realpath(__FILE__)) + '/../lib')
+
+require 'rubygems'
+require 'gli'
+require 'pp'
+require 'date'
+require 'chronic'
+require 'fastercsv'
+require 'date'
+require 'gooddata'
+require 'gooddata/command'
+require 'logger'
+require "../lib/google_downloader.rb"
+require "../lib/validation.rb"
+
+include GLI
+
+LOGIN     = ENV['LOGIN']
+PASSWORD  = ENV['PASSWORD']
+
+program_desc 'Program for running validations on server'
+#version Es::VERSION
+
+
+desc 'Gooddata test'
+command :gooddata do |c|
+
+  c.desc 'Param file name'
+  c.default_value ""
+  c.flag [:f, :file]
+
+
+  c.action do |global_options,options,args|
+
+          fail "Param file not exists" unless File.exist?(options[:file])
+          json = JSON.parse(File.read(options[:file]))
+          @GOODDATA_LOGIN =      json["GOODDATA_LOGIN"]
+          @GOODDATA_PASSWORD =   json["GOODDATA_PASSWORD"]
+          @S3_CREDENTIALS_FILE = json["S3_CREDENTIALS_FILE"]
+          @GOOGLE_LOGIN     =    json["GOOGLE_LOGIN"]
+          @GOOGLE_PASSWORD  =    json["GOOGLE_PASSWORD"]
+          @GOOGLE_SHEET_ID  =    json["GOOGLE_SHEET_ID"]
+          @GOOGLE_WORKSHEET_ID = json["GOOGLE_WORKSHEET_ID"]
+
+          google = ProjectValidator::GoogleDownloader.new(@GOOGLE_LOGIN,@GOOGLE_PASSWORD,@GOOGLE_SHEET_ID,@GOOGLE_WORKSHEET_ID)
+
+          validator = ProjectValidator::Validation.new(@GOODDATA_LOGIN,@GOODDATA_PASSWORD,google.get_projects_to_validate,"validations/")
+          validator.process
+  end
+end
+
+
+pre do |global,command,options,args|
+  next true if command.nil?
+  # Pre logic here
+  # Return true to proceed; false to abourt and not call the
+  # chosen command
+  # Use skips_pre before a command to skip this block
+  # on that command only
+  GoodData.logger = Logger.new(STDOUT) if global[:logger]
+  true
+end
+
+post do |global,command,options,args|
+  # Post logic here
+  # Use skips_post before a command to skip this
+  # block on that command only
+end
+
+on_error do |exception|
+  pp exception.backtrace
+  if exception.is_a?(SystemExit) && exception.status == 0
+    false
+  else
+    pp exception.inspect
+
+    false
+  end
+
+  # Error logic here
+  # return false to skip default error handling
+  # false
+  # true
+end
+
+exit GLI.run(ARGV)
