@@ -44,8 +44,8 @@ command :gooddata do |c|
 
   c.action do |global_options,options,args|
 
-          fail "Param file not exists" unless File.exist?(options[:file])
-          json = JSON.parse(File.read(options[:file]))
+          fail "Param file not exists" unless File.exist?(args[:file])
+          json = JSON.parse(File.read(args[:file]))
           @GOODDATA_LOGIN =      json["GOODDATA_LOGIN"]
           @GOODDATA_PASSWORD =   json["GOODDATA_PASSWORD"]
           @S3_CREDENTIALS_FILE = json["S3_CREDENTIALS_FILE"]
@@ -56,7 +56,7 @@ command :gooddata do |c|
 
           google = ProjectValidator::GoogleDownloader.new(@GOOGLE_LOGIN,@GOOGLE_PASSWORD,@GOOGLE_SHEET_ID,@GOOGLE_WORKSHEET_ID)
 
-          validator = ProjectValidator::Validation.new(@GOODDATA_LOGIN,@GOODDATA_PASSWORD,google.get_projects_to_validate,"validations/")
+          validator = ProjectValidator::Validation.new(@GOODDATA_LOGIN,@GOODDATA_PASSWORD,google.get_projects_to_validate,"")
           validator.process
   end
 end
