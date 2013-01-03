@@ -44,9 +44,9 @@ command :gooddata do |c|
 
   c.action do |global_options,options,args|
           pp args
-          puts args[:file]
-          fail "Param file not exists" unless File.exist?(args[:file])
-          json = JSON.parse(File.read(args[:file]))
+          pp options
+          fail "Param file not exists" unless File.exist?(options[:file])
+          json = JSON.parse(File.read(options[:file]))
           @GOODDATA_LOGIN =      json["GOODDATA_LOGIN"]
           @GOODDATA_PASSWORD =   json["GOODDATA_PASSWORD"]
           @S3_CREDENTIALS_FILE = json["S3_CREDENTIALS_FILE"]
