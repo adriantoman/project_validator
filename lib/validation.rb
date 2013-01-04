@@ -29,6 +29,7 @@ module ProjectValidator
 
 
       def integration_running(pid)
+        puts "Pid is: #{pid}"
         GoodData.use pid
         response = GoodData.project.check_status
         if (response =~ /RUNNING/) then
