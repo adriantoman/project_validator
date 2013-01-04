@@ -43,10 +43,6 @@ command :gooddata do |c|
 
 
   c.action do |global_options,options,args|
-          pp File.expand_path(options[:file])
-
-          puts Dir.pwd
-
           fail "Param file not exists" unless File.exist?(options[:file])
           json = JSON.parse(File.read(options[:file]))
           @GOODDATA_LOGIN =      json["GOODDATA_LOGIN"]
@@ -56,10 +52,11 @@ command :gooddata do |c|
           @GOOGLE_PASSWORD  =    json["GOOGLE_PASSWORD"]
           @GOOGLE_SHEET_ID  =    json["GOOGLE_SHEET_ID"]
           @GOOGLE_WORKSHEET_ID = json["GOOGLE_WORKSHEET_ID"]
-
+          @GOOGLE_WORKSHEET_ID = json["GOOGLE_WORKSHEET_ID"]
+          @EXPORT_PATH         = json["EXPORT_PATH"]
           google = ProjectValidator::GoogleDownloader.new(@GOOGLE_LOGIN,@GOOGLE_PASSWORD,@GOOGLE_SHEET_ID,@GOOGLE_WORKSHEET_ID)
 
-          validator = ProjectValidator::Validation.new(@GOODDATA_LOGIN,@GOODDATA_PASSWORD,google.get_projects_to_validate,"")
+          validator = ProjectValidator::Validation.new(@GOODDATA_LOGIN,@GOODDATA_PASSWORD,google.get_projects_to_validate,@EXPORT_PATH)
           validator.process
   end
 end
