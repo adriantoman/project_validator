@@ -56,10 +56,42 @@ command :gooddata do |c|
           @EXPORT_PATH         = json["EXPORT_PATH"]
           google = ProjectValidator::GoogleDownloader.new(@GOOGLE_LOGIN,@GOOGLE_PASSWORD,@GOOGLE_SHEET_ID,@GOOGLE_WORKSHEET_ID)
 
-          validator = ProjectValidator::Validation.new(@GOODDATA_LOGIN,@GOODDATA_PASSWORD,google.get_projects_to_validate,@EXPORT_PATH)
+          validator = ProjectValidator::Validation.new(@GOODDATA_LOGIN,@GOODDATA_PASSWORD,google.get_projects_to_validate,@EXPORT_PATH,"https://secure.gooddata.com")
+          validator.process
+
+          validator = ProjectValidator::Validation.new(@GOODDATA_LOGIN,@GOODDATA_PASSWORD,google.get_projects_to_validate,@EXPORT_PATH,"https://na1.gooddata.com")
           validator.process
   end
 end
+
+desc 'MS Deployment access test'
+command :access_test do |c|
+
+  c.desc 'Param file name'
+  c.default_value ""
+  c.flag [:f, :file]
+
+
+  c.action do |global_options,options,args|
+    fail "Param file not exists" unless File.exist?(options[:file])
+    json = JSON.parse(File.read(options[:file]))
+    @GOODDATA_LOGIN =      json["GOODDATA_LOGIN"]
+    @GOODDATA_PASSWORD =   json["GOODDATA_PASSWORD"]
+    @S3_CREDENTIALS_FILE = json["S3_CREDENTIALS_FILE"]
+    @GOOGLE_LOGIN     =    json["GOOGLE_LOGIN"]
+    @GOOGLE_PASSWORD  =    json["GOOGLE_PASSWORD"]
+    @GOOGLE_SHEET_ID  =    json["GOOGLE_SHEET_ID"]
+    @GOOGLE_WORKSHEET_ID = json["GOOGLE_WORKSHEET_ID"]
+    @GOOGLE_WORKSHEET_ID = json["GOOGLE_WORKSHEET_ID"]
+    @EXPORT_PATH         = json["EXPORT_PATH"]
+    google = ProjectValidator::GoogleDownloader.new(@GOOGLE_LOGIN,@GOOGLE_PASSWORD,@GOOGLE_SHEET_ID,@GOOGLE_WORKSHEET_ID)
+
+
+    validator = ProjectValidator::Validation.new(@GOODDATA_LOGIN,@GOODDATA_PASSWORD,google.get_projects_live,@EXPORT_PATH,"https://secure.gooddata.com")
+    validator.check_user_access
+  end
+end
+
 
 
 pre do |global,command,options,args|

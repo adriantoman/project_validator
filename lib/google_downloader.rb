@@ -35,17 +35,17 @@ module ProjectValidator
       pid_col = get_column_id("Project pid")
       status_col = get_column_id("Status")
       validation_col = get_column_id("Automatic validation")
+      responsible_col = get_column_id("MS Person")
 
 
       for row in 2..@worksheet.num_rows
-          project_info = ProjectInfo.new(@worksheet[row,customer_col],@worksheet[row,project_col],@worksheet[row,pid_col],@worksheet[row,status_col],@worksheet[row, validation_col])
+          project_info = ProjectInfo.new(@worksheet[row,customer_col],@worksheet[row,project_col],@worksheet[row,pid_col],@worksheet[row,status_col],@worksheet[row, validation_col],@worksheet[row, responsible_col])
           @projects.push(project_info)
       end
     end
 
     def get_column_id(name)
       for col in 1..@worksheet.num_cols
-         pp @worksheet[1,col]
           if (@worksheet[1,col] == name) then
             return col
           end
@@ -56,24 +56,39 @@ module ProjectValidator
       @projects.find_all{|project| project.validate? }
     end
 
+
+    def get_projects_live
+      @projects.find_all{|project| project.live? }
+    end
+
   end
 
 
   class ProjectInfo
 
-    attr_accessor :customer, :project, :pid, :status, :validate
+    attr_accessor :customer, :project, :pid, :status, :validate,:responsible
 
-   def initialize(customer,project,pid, status,validate)
+   def initialize(customer,project,pid, status,validate,responsible)
       @customer = customer
       @project = project
       @pid = pid
       @status = status
       @validate = validate
+      @responsible = responsible
 
     end
 
     def validate?
       if (validate.downcase == "yes") then
+        return true
+      else
+        return false
+      end
+    end
+
+
+    def live?
+      if (status.downcase == "live") then
         return true
       else
         return false

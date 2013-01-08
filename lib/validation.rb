@@ -11,20 +11,59 @@ module ProjectValidator
 
       TASK_POOL_SIZE = 3
 
-      attr_accessor :task_pool,:items_to_process
+      attr_accessor :task_pool,:items_to_process, :login
 
 
-      def initialize(login, password,items_to_process,export_path)
+      def initialize(login, password,items_to_process,export_path,server)
         @task_pool = Array.new
         @items_to_process = items_to_process
         @export_path = export_path
+        @login = login
         GoodData.logger = Logger.new(STDOUT)
-        GoodData.connect(login,password)
+        GoodData.connect(login,password,server)
+
+        check_server
 
       end
 
+
+      def check_server
+        json = get_acccessible_projects
+        @items_to_process.delete_if do |item|
+          delete = true
+          json["about"]["links"].each do |project|
+            #puts "Checking #{project["identifier"]}"
+            if project["identifier"] == item.pid then delete = false end
+          end
+          delete
+        end
+      end
+
+
       def items_in_task_poll
         @task_pool.count
+      end
+
+
+
+      def get_acccessible_projects
+        GoodData.connection.retryable(:tries => 3, :on => RestClient::InternalServerError) do
+          sleep 5
+          @response = GoodData.get("/gdc/md", :process => false)
+        end
+        JSON.parse @response
+      end
+
+      def check_user_access
+        json =  get_acccessible_projects
+        @items_to_process.each do |item|
+          exist = false
+          json["about"]["links"].each do |project|
+            if project["identifier"] == item.pid then exist = true end
+          end
+
+            puts "User #{@login} don't have access to project #{item.customer}-#{item.project}(#{item.pid}) with responsible person #{item.responsible}" if exist != true
+        end
       end
 
 
